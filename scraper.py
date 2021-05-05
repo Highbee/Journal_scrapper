@@ -1,11 +1,23 @@
+"""
+    Author: Ibrahim, Ibrahim Opeyemi
+        Email: IbrahimIbrahimOpeyemi@gmail.com
+        Phone: 08107321115
+    Version: Not set yet
+    This script copies articles from Ajol. It works with ajol and
+         probably any aggregator sites using exactly the same HTML template
+    ---------------usage-------------
+    1.  set listing URL address and output word document file name
+    in the listing_url and doc_path variables
+    ---------------dependencies-----------
+    1.  BeautifulSoup4==4.9.1
+    2.  requests==2.24.0
+
+
+"""
 from bs4 import BeautifulSoup
 import requests
 import docx
-"""
-    set listing url address and output word document file name
-    in the listing_url and doc_path variables
 
-"""
 listing_url = input("Input listing URL: ").strip()
 doc_path = 'hybreed_spider.docx'
 
@@ -113,6 +125,7 @@ if response_text != False:
         mydoc = docx.Document(doc_path)
         mydoc.add_paragraph(
             f"{usable_authors}. {usable_title}. {usable_volume}: {usable_page_number}.  {usable_abstract}")
+        mydoc.add_paragraph("")
         mydoc.save(doc_path)
         i += 1
         print(f"Processed: {i}")
