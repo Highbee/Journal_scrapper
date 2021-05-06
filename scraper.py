@@ -6,8 +6,8 @@
     This script copies articles from Ajol. It works with ajol and
          probably any aggregator sites using exactly the same HTML template
     ---------------usage-------------
-    1.  set listing URL address and output word document file name
-    in the listing_url and doc_path variables
+    1. Not yet defined
+    
     ---------------dependencies-----------
     1.  BeautifulSoup4==4.9.1
     2.  requests==2.24.0
@@ -19,7 +19,6 @@ import requests
 import docx
 
 listing_url = input("Input listing URL: ").strip()
-doc_path = 'hybreed_spider.docx'
 
 
 def get_volume(bsoup):
@@ -79,13 +78,17 @@ def fetch_abstract(url):
         abstract_bsoup = create_bsoup(r_text)
         try:
             abstract = abstract_bsoup.select(
-                "#pkp_content_main > div.page.page_article > article > div > div.main_entry > div.item.abstract > p:nth-child(2)")
-            abstract = abstract[0].getText()
+                "#pkp_content_main > div.page.page_article > article > div > div.main_entry > div.item.abstract")
+            abstract_temp = abstract[0].getText()
+            abstract = abstract_temp
+            return abstract
         except IndexError:
             try:
                 abstract = abstract_bsoup.select(
-                    "#pkp_content_main > div.page.page_article > article > div > div.main_entry > div.item.abstract")
-                abstract = abstract[0].getText()
+                    "#pkp_content_main > div.page.page_article > article > div > div.main_entry > div.item.abstract p")
+                abstract_temp = "".join([a.getText() for a in abstract])
+                abstract = abstract_temp
+                return abstract
             except IndexError:
                 abstract = ". No Abstract Found! "
 
@@ -114,6 +117,11 @@ if response_text != False:
         ".obj_article_summary"
     )
     usable_volume = get_volume(bsoup)
+    # create blank document with volume name+ issue
+    mydoc = docx.Document()
+    # define working document name. Prefix volume+issue details with journal name
+    file_name = f"{usable_volume}.docx"
+    mydoc.save(file_name)
     i = 0
     for a in articles:
         usable_title = get_title(a)
@@ -122,11 +130,13 @@ if response_text != False:
         usable_article_url = get_article_url(a)
         usable_abstract = fetch_abstract(usable_article_url)
 
-        mydoc = docx.Document(doc_path)
-        mydoc.add_paragraph(
-            f"{usable_authors}. {usable_title}. {usable_volume}: {usable_page_number}.  {usable_abstract}")
+        mydoc = docx.Document(file_name)
+        paragraph = mydoc.add_paragraph(f"{usable_authors}.")
+        paragraph.add_run(f"{usable_title}.").bold = True
+        paragraph.add_run(
+            f"{usable_volume}: {usable_page_number}.  {usable_abstract}")
         mydoc.add_paragraph("")
-        mydoc.save(doc_path)
+        mydoc.save(file_name)
         i += 1
         print(f"Processed: {i}")
     print("All complete!!!")
