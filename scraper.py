@@ -2,11 +2,20 @@
     Author: Ibrahim, Ibrahim Opeyemi
         Email: IbrahimIbrahimOpeyemi@gmail.com
         Phone: 08107321115
-    Version: Not set yet
+    Version: 1.2
     This script copies articles from Ajol. It works with ajol and
          probably any aggregator sites using exactly the same HTML template
     ---------------usage-------------
-    1. Not yet defined
+    1. Ensure the directory the script resides is empty or at least
+        doesn't have and word documents
+    2. launch the script and run in terminal 
+        copy and paste the journal archive url in the terminal prompt
+    3. When the "All issues listed in the page have been saved successfully"
+        message appears, move the generated word documents to the where you'd like
+        to store them
+    NB: The scripts overwrite existing file when name conflict occur
+    tabs and line feed are usually present in the generated files.
+    this will ease finally formatting of these documents
 
     ---------------dependencies-----------
     1.  BeautifulSoup4==4.9.1
@@ -21,6 +30,25 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 issues_listing_url = input("Input Issues listing URL ('Archive'): ").strip()
+
+
+def fetch_biography(url):
+    r_text = get_reponse_text(url)
+    if r_text != False:
+        soup = create_bsoup(r_text)
+    try:
+        author_bio_divs = soup.find_all(
+            'div', class_="item author_bios")
+        if len(author_bio_divs) > 0:
+            author_bio = "".join([a.getText() for a in author_bio_divs])
+            author_bio = f"({author_bio})"
+            return author_bio
+        else:
+            author_bio = ""
+            return author_bio
+    except IndexError:
+        author_bio = ""
+        return author_bio
 
 
 def get_journal_name(journal_name_bsoup):
@@ -176,10 +204,11 @@ for issue in issues_list:
             usable_page_number = get_page_number(a)
             usable_article_url = get_article_url(a)
             usable_abstract = fetch_abstract(usable_article_url)
+            usable_biography = fetch_biography(usable_article_url)
 
             mydoc = docx.Document(file_name)
             paragraph = mydoc.add_paragraph(
-                f"{usable_authors}. ")
+                f"{usable_authors}. {usable_biography}. ")
             paragraph.add_run(f"{usable_title}. ").bold = True
             paragraph.add_run(
                 f"{usable_volume}: {usable_page_number}.  {usable_abstract} ")
