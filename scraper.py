@@ -10,7 +10,8 @@
         doesn't have and word documents
     2. launch the script and run in terminal 
         copy and paste the journal archive url in the terminal prompt
-    3. When the "All issues listed in the page have been saved successfully"
+    3. Input the position of the issue to start copying from. If
+    4. When the "All issues listed in the page have been saved successfully"
         message appears, move the generated word documents to the where you'd like
         to store them
     NB: The scripts overwrite existing file when name conflict occur
@@ -31,6 +32,17 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 issues_listing_url = input("Input Issues listing URL ('Archive'): ").strip()
 
+try:
+    start_at = input(
+        "Input the start Issue position on the page(default=1): ").strip()
+
+    start_at = int(start_at)
+    print(f"Starting at issue no {start_at}")
+    start_at = start_at - 1
+except ValueError:
+    print("Invalid position. Only integer allowed")
+    start_at = -1
+
 
 def fetch_biography(url):
     r_text = get_reponse_text(url)
@@ -42,6 +54,7 @@ def fetch_biography(url):
         if len(author_bio_divs) > 0:
             author_bio = "".join([a.getText() for a in author_bio_divs])
             author_bio = f"({author_bio})"
+            author_bio = author_bio.replace('\t', " ")
             return author_bio
         else:
             author_bio = ""
@@ -141,6 +154,7 @@ def fetch_abstract(url):
                 "#pkp_content_main > div.page.page_article > article > div > div.main_entry > div.item.abstract")
             abstract_temp = abstract[0].getText()
             abstract = abstract_temp
+            abstract = abstract.replace("\t", " ")
             # print("First Conditional at work")
             return abstract
         except IndexError:
@@ -148,7 +162,7 @@ def fetch_abstract(url):
                 abstract = abstract_bsoup.select(
                     "#pkp_content_main > div.page.page_article > article > div > div.main_entry > div.item.abstract p")
                 abstract_temp = "".join([a.getText() for a in abstract])
-                abstract = abstract_temp
+                abstract = abstract_temp.replace("\t", " ")
                 # print("Second Conditional at work!")
                 return abstract
             except IndexError:
@@ -172,11 +186,12 @@ def create_bsoup(response_text):
 
 
 issues_list = get_issue_url(issues_listing_url)
+issues_list = issues_list[start_at:]
 issue_i = 0
 for issue in issues_list:
     response_text = get_reponse_text(issue)
     # implementation
-    if response_text != False:
+    if (response_text != False) and (start_at != -1):
         bsoup = create_bsoup(response_text)
         articles = bsoup.select(
             ".obj_article_summary"
