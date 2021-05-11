@@ -214,6 +214,12 @@ for issue in issues_list:
 
         i = 0
         for a in articles:
+            # use this list to skip articles with character not
+            # compatible with XML(unicode or ASCII)
+            # empty when done with the volume
+            # if i in []:
+            #     i += 1
+            #     continue
             usable_title = get_title(a)
             usable_authors = get_authors(a)
             usable_page_number = get_page_number(a)
@@ -235,4 +241,4 @@ for issue in issues_list:
         issue_i += 1
         print(f"No of issues saved: {issue_i}")
 
-print("All issues listed in the page have been saved successfully")
+print("All issues listed in the page have been saved successfully 😊")
