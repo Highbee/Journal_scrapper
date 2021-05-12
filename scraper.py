@@ -26,6 +26,7 @@
 """
 from bs4 import BeautifulSoup
 import requests
+import unicodedata
 import docx
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -171,10 +172,19 @@ def fetch_abstract(url):
         return abstract
 
 
+def control_char_remover(text):
+    treated = "".join([char for char in text if
+                       unicodedata.category(char)[0] != "C"])
+    return treated
+
+
 def get_reponse_text(url):
     response = requests.get(url)
     if response.status_code == 200:
         response_text = response.text
+        response_text = response_text.encode('utf-8', errors='replace')
+        response_text = response_text.decode('utf-8')
+        response_text = control_char_remover(response_text)
         return response_text
     else:
         return False
