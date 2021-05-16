@@ -8,7 +8,7 @@
     ---------------usage-------------
     1. Ensure the directory the script resides is empty or at least
         doesn't have and word documents
-    2. launch the script and run in terminal 
+    2. launch the script and run in terminal
         copy and paste the journal archive url in the terminal prompt
     3. Input the position of the issue to start copying from. If
     4. When the "All issues listed in the page have been saved successfully"
@@ -32,17 +32,25 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 issues_listing_url = input("Input Issues listing URL ('Archive'): ").strip()
+start_at = input(
+    "Input the start Issue position on the page(default=1): ").strip()
+stop_at = input(
+    "Input stop issue position OR any letter to run till the last issue: ").strip()
+
 
 try:
-    start_at = input(
-        "Input the start Issue position on the page(default=1): ").strip()
-
     start_at = int(start_at)
-    print(f"Starting at issue no {start_at}")
     start_at = start_at - 1
+    start_at = abs(start_at)
 except ValueError:
-    print("Invalid position. Only integer allowed")
-    start_at = -1
+    start_at = 0
+try:
+    stop_at = int(stop_at)
+    stop_at = abs(stop_at)
+except ValueError:
+    stop_at = None
+stop_to_print = "the end" if stop_at == None else stop_at
+print(f"Starting at issue no {start_at+1} and stopping at: {stop_to_print}")
 
 
 def fetch_biography(url):
@@ -184,7 +192,7 @@ def get_reponse_text(url):
         response_text = response.text
         response_text = response_text.encode('utf-8', errors='replace')
         response_text = response_text.decode('utf-8')
-        response_text = control_char_remover(response_text)
+        # response_text = control_char_remover(response_text)
         return response_text
     else:
         return False
@@ -196,7 +204,7 @@ def create_bsoup(response_text):
 
 
 issues_list = get_issue_url(issues_listing_url)
-issues_list = issues_list[start_at:]
+issues_list = issues_list[start_at:stop_at]
 issue_i = 0
 for issue in issues_list:
     response_text = get_reponse_text(issue)
