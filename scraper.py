@@ -3,24 +3,25 @@
         Email: IbrahimIbrahimOpeyemi@gmail.com
         Phone: 08107321115
     Version: 1.2
-    This script copies articles from Ajol. It works with ajol and
+    This script copies articles from Ajol. It works with Ajol and
          probably any aggregator sites using exactly the same HTML template
     ---------------usage-------------
-    1. Ensure the directory the script resides is empty or at least
-        doesn't have and word documents
-    2. launch the script and run in terminal
-        copy and paste the journal archive url in the terminal prompt
-    3. Input the position of the issue to start copying from. If
+    1. Ensure the directory the scraper script resides is empty or at least
+        doesn't have and word documents.
+    2. Run the script in terminal and Paste the journal's archive url in 
+        the terminal prompt
+    3. Input the position of the issue to start copying from or press enter
+        to start at default (first index)
     4. When the "All issues listed in the page have been saved successfully"
-        message appears, move the generated word documents to the where you'd like
-        to store them
-    NB: The scripts overwrite existing file when name conflict occur
-    tabs and line feed are usually present in the generated files.
-    this will ease finally formatting of these documents
-
+        message appears, move the generated word documents to the folder
+         you'd like to store them.
+    NB: The script overwrites existing file when name conflict occurs.
+        To ease final formatting documents, tabs and line feed are usually 
+        present in the generated documents.
     ---------------dependencies-----------
     1.  BeautifulSoup4==4.9.1
     2.  requests==2.24.0
+    3.  Python-docx==0.8.10
 
 
 """
@@ -192,7 +193,7 @@ def get_reponse_text(url):
         response_text = response.text
         response_text = response_text.encode('utf-8', errors='replace')
         response_text = response_text.decode('utf-8')
-        # response_text = control_char_remover(response_text)
+        response_text = control_char_remover(response_text)
         return response_text
     else:
         return False
@@ -221,7 +222,7 @@ for issue in issues_list:
         # Save working document name. Prefix journal name +vol+issue details
         journal_name = get_journal_name(bsoup)
         file_name = f"{journal_name}_{usable_volume}.docx"
-        file_name = file_name.replace(":", "")
+        file_name = file_name.replace(":", "").replace("/", "")
         print(f"creating file: {file_name}")
         # create style
         style = mydoc.styles['Normal']
@@ -259,4 +260,4 @@ for issue in issues_list:
         issue_i += 1
         print(f"No of issues saved: {issue_i}")
 
-print("All issues listed in the page have been saved successfully 😊")
+print("All issues listed in the page have been saved successfully ✔ ☑  😊😍")
